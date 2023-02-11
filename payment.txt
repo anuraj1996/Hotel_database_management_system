@@ -1,0 +1,125 @@
+ CREATE TABLE payment(
+    -> payid                     int(10),
+    -> bookingid               int(10),
+    -> itemid                     int(10),
+    -> itemcost                   float(10,2) DEFAULT null,
+    -> orderid               int(10),
+    -> qty                        INT (10) DEFAULT 0,
+    -> roomtypeid                 int(20),
+    -> cost                       float(10,2) DEFAULT null,
+    -> checkinp                   datetime DEFAULT null,
+    -> checkoutp                  datetime DEFAULT null,
+    -> duration                   INT(10) DEFAULT null,
+    -> amount               float(10,2) DEFAULT NUll,
+    -> paytype               varchar(20) NOT NULL,
+    -> paydate               Datetime DEFAULT NULL,
+    ->
+    ->
+    -> primary key(payid),
+    -> foreign key(bookingid) references booking(bookingid),
+    -> foreign key(orderid) references orders(orderid),
+    -> foreign key(roomtypeid) references roomtype(roomtypeid)
+    ->
+    -> );
+
+
+
+INSERT INTO PAYMENT
+    -> ( PAYid,BOOKINGid,itemid,itemcost,orderid,qty,roomtypeid,cost,checkinp,checkoutp,duration,amount,paytype,paydate)
+    -> VALUES
+    -> ( 1,1,1,NULL,1,NULL,1,NULL,NULL,NULL,DATEDIFF(checkoutp, checkinp),(cost*duration)+(itemcost*qty),'CASH',checkoutp),
+    -> ( 2,2,2,NULL,2,NULL,2,NULL,NULL,NULL,DATEDIFF(checkoutp, checkinp),(cost*duration)+(itemcost*qty),'NET BANKING',checkoutp),
+    -> ( 3,3,3,NULL,3,NULL,4,NULL,NULL,NULL,DATEDIFF(checkoutp, checkinp),(cost*duration)+(itemcost*qty),'CASH',checkoutp),
+    -> ( 4,4,4,NULL,4,NULL,2,NULL,NULL,NULL,DATEDIFF(checkoutp, checkinp),(cost*duration)+(itemcost*qty),'UPI',checkoutp),
+    -> ( 5,5,5,NULL,5,NULL,1,NULL,NULL,NULL,DATEDIFF(checkoutp, checkinp),(cost*duration)+(itemcost*qty),'UPI',checkoutp),
+    -> ( 6,6,6,NULL,6,NULL,3,NULL,NULL,NULL,DATEDIFF(checkoutp, checkinp),(cost*duration)+(itemcost*qty),'NET BANKING',checkoutp),
+    -> ( 7,7,7,NULL,7,NULL,3,NULL,NULL,NULL,DATEDIFF(checkoutp, checkinp),(cost*duration)+(itemcost*qty),'UPI',checkoutp),
+    -> ( 8,8,8,NULL,8,NULL,2,NULL,NULL,NULL,DATEDIFF(checkoutp, checkinp),(cost*duration)+(itemcost*qty),'CASH',checkoutp),
+    ->       ( 9,9,9,NULL,9,NULL,4,NULL,NULL,NULL,DATEDIFF(checkoutp, checkinp),(cost*duration)+(itemcost*qty),'NET BANKING',checkoutp),
+    ->       ( 10,10,10,NULL,10,NULL,1,NULL,NULL,NULL,DATEDIFF(checkoutp, checkinp),(cost*duration)+(itemcost*qty),'DEBIT CARD',checkoutp);
+
+
+
+alter table  orders modify column qty int(10) default 0;
+
+
+update orders set qty=0 where orderid in(1,7);
+
+
+
+ update payment
+    ->      set  itemcost = (
+    ->      select itemcost
+    ->      from item
+    ->      where payment.itemid = item.itemid  );
+
+
+update payment
+    ->      set  qty = (
+    ->      select qty
+    ->      from orders
+    ->      where payment.orderid = orders.orderid  );
+
+
+update payment
+    ->      set  cost= (
+    ->      select cost
+    ->      from roomtype
+    ->      where payment.roomtypeid =roomtype.roomtypeid );
+
+
+update payment
+    ->      set  checkinp= (
+    ->      select checkin
+    ->      from booking
+    ->      where payment.bookingid =booking.bookingid  );
+
+
+update payment
+    ->      set  checkoutp= (
+    ->      select checkout
+    ->      from booking
+    ->       where payment.bookingid =booking.bookingid );
+
+
+
++-------+-----------+--------+----------+---------+------+------------+----------+---------------------+---------------------+----------+--------+-------------+---------+
+| payid | bookingid | itemid | itemcost | orderid | qty  | roomtypeid | cost     | checkinp            | checkoutp           | duration | amount | paytype     | paydate |
++-------+-----------+--------+----------+---------+------+------------+----------+---------------------+---------------------+----------+--------+-------------+---------+
+|     1 |         1 |      1 |   450.00 |       1 |    0 |          1 |  5000.00 | 2016-01-02 12:00:00 | 2016-01-04 12:00:00 |     NULL |   NULL | CASH        | NULL    |
+|     2 |         2 |      2 |   160.00 |       2 |    2 |          2 |  7000.00 | 2016-02-03 14:00:00 | 2016-02-05 12:00:00 |     NULL |   NULL | NET BANKING | NULL    |
+|     3 |         3 |      3 |   440.00 |       3 |    2 |          4 | 12000.00 | 2017-03-04 16:00:00 | 2017-03-06 12:00:00 |     NULL |   NULL | CASH        | NULL    |
+|     4 |         4 |      4 |   700.00 |       4 |    1 |          2 |  7000.00 | 2018-04-05 14:00:00 | 2018-04-07 12:00:00 |     NULL |   NULL | UPI         | NULL    |
+|     5 |         5 |      5 |   120.00 |       5 |    4 |          1 |  5000.00 | 2018-05-09 12:00:00 | 2018-05-11 12:00:00 |     NULL |   NULL | UPI         | NULL    |
+|     6 |         6 |      6 |   900.00 |       6 |    2 |          3 |  8500.00 | 2019-03-06 16:00:00 | 2019-03-08 12:00:00 |     NULL |   NULL | NET BANKING | NULL    |
+|     7 |         7 |      7 |   120.00 |       7 |    0 |          3 |  8500.00 | 2017-02-07 12:00:00 | 2017-02-09 12:00:00 |     NULL |   NULL | UPI         | NULL    |
+|     8 |         8 |      8 |   200.00 |       8 |    1 |          2 |  7000.00 | 2022-03-08 14:00:00 | 2022-03-09 12:00:00 |     NULL |   NULL | CASH        | NULL    |
+|     9 |         9 |      9 |   150.00 |       9 |    2 |          4 | 12000.00 | 2021-04-08 12:00:00 | 2021-04-10 12:00:00 |     NULL |   NULL | NET BANKING | NULL    |
+|    10 |        10 |     10 |   180.00 |      10 |    2 |          1 |  5000.00 | 2022-04-10 12:00:00 | 2022-04-14 12:00:00 |     NULL |   NULL | DEBIT CARD  | NULL    |
++-------+-----------+--------+----------+---------+------+------------+----------+---------------------+---------------------+----------+--------+-------------+---------+
+
+
+
+ update payment set duration=datediff(checkoutp,checkinp);
+
+
+update payment set amount=cost*duration + itemcost*qty;
+
+
+update payment set paydate=checkoutp;
+
+
++-------+-----------+--------+----------+---------+------+------------+----------+---------------------+---------------------+----------+----------+-------------+---------------------+
+| payid | bookingid | itemid | itemcost | orderid | qty  | roomtypeid | cost     | checkinp            | checkoutp           | duration | amount   | paytype     | paydate             |
++-------+-----------+--------+----------+---------+------+------------+----------+---------------------+---------------------+----------+----------+-------------+---------------------+
+|     1 |         1 |      1 |   450.00 |       1 |    0 |          1 |  5000.00 | 2016-01-02 12:00:00 | 2016-01-04 12:00:00 |        2 | 10000.00 | CASH        | 2016-01-04 12:00:00 |
+|     2 |         2 |      2 |   160.00 |       2 |    2 |          2 |  7000.00 | 2016-02-03 14:00:00 | 2016-02-05 12:00:00 |        2 | 14320.00 | NET BANKING | 2016-02-05 12:00:00 |
+|     3 |         3 |      3 |   440.00 |       3 |    2 |          4 | 12000.00 | 2017-03-04 16:00:00 | 2017-03-06 12:00:00 |        2 | 24880.00 | CASH        | 2017-03-06 12:00:00 |
+|     4 |         4 |      4 |   700.00 |       4 |    1 |          2 |  7000.00 | 2018-04-05 14:00:00 | 2018-04-07 12:00:00 |        2 | 14700.00 | UPI         | 2018-04-07 12:00:00 |
+|     5 |         5 |      5 |   120.00 |       5 |    4 |          1 |  5000.00 | 2018-05-09 12:00:00 | 2018-05-11 12:00:00 |        2 | 10480.00 | UPI         | 2018-05-11 12:00:00 |
+|     6 |         6 |      6 |   900.00 |       6 |    2 |          3 |  8500.00 | 2019-03-06 16:00:00 | 2019-03-08 12:00:00 |        2 | 18800.00 | NET BANKING | 2019-03-08 12:00:00 |
+|     7 |         7 |      7 |   120.00 |       7 |    0 |          3 |  8500.00 | 2017-02-07 12:00:00 | 2017-02-09 12:00:00 |        2 | 17000.00 | UPI         | 2017-02-09 12:00:00 |
+|     8 |         8 |      8 |   200.00 |       8 |    1 |          2 |  7000.00 | 2022-03-08 14:00:00 | 2022-03-09 12:00:00 |        1 |  7200.00 | CASH        | 2022-03-09 12:00:00 |
+|     9 |         9 |      9 |   150.00 |       9 |    2 |          4 | 12000.00 | 2021-04-08 12:00:00 | 2021-04-10 12:00:00 |        2 | 24300.00 | NET BANKING | 2021-04-10 12:00:00 |
+|    10 |        10 |     10 |   180.00 |      10 |    2 |          1 |  5000.00 | 2022-04-10 12:00:00 | 2022-04-14 12:00:00 |        4 | 20360.00 | DEBIT CARD  | 2022-04-14 12:00:00 |
++-------+-----------+--------+----------+---------+------+------------+----------+---------------------+---------------------+----------+----------+-------------+---------------------+

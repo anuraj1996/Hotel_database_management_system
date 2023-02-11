@@ -1,0 +1,139 @@
+1) EXCEPTION HANDLING- (always done inside a procedure in real life)
+
+a) simple declare using condition_value=1062(primary key error code)-
+
+DELIMITER /
+CREATE PROCEDURE chckprimary(IN eid INT,name VARCHAR(25),type Varchar(25))
+BEGIN
+declare exit handler for 1062
+SELECT concat(eid,"record already present,Cant duplicate!") As Message;
+INSERT INTO employee(empid,fname,emptype) values(eid,name,type);
+END / 
+
+
+CREATE PROCEDURE chckprimary(IN eid INT,name VARCHAR(25),type Varchar(25))
+    -> BEGIN
+    -> declare exit handler for 1062
+    -> SELECT concat(eid,"record already present,Cant duplicate!") As Message;
+    -> INSERT INTO employee(empid,fname,emptype) values(eid,name,type);
+    -> END /
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> call chckprimary(1,'ram','nsjsan')/
++-----------------------------------------+
+| Message                                 |
++-----------------------------------------+
+| 1record already present,Cant duplicate! |
++-----------------------------------------+
+1 row in set (0.01 sec)
+
+Query OK, 0 rows affected (0.01 sec)
+
+b)Adding multiple declare exceptions- 
+
+CREATE PROCEDURE chckprimaryt(IN eid INT,name VARCHAR(25),type Varchar(25))
+BEGIN
+
+	declare exit handler for 1062
+	BEGIN
+		SELECT concat(eid,"record already present,Cant duplicate!") As Message;
+	END;
+	
+	Declare exit handler for 1146
+
+		select'Sorry Entered table is not present.';
+      INSERT INTO temp5(empid,fname,emptype) VALUES(eid,name,type); 
+
+END / 
+
+ CREATE PROCEDURE chckprimaryt(IN eid INT,name VARCHAR(25),type Varchar(25))
+    -> BEGIN
+    ->
+    -> declare exit handler for 1062
+    -> BEGIN
+    -> SELECT concat(eid,"record already present,Cant duplicate!") As Message;
+    -> END;
+    ->
+    -> Declare exit handler for 1146
+    ->
+    -> select'Sorry Entered table is not present.';
+    ->       INSERT INTO temp5(empid,fname,emptype) VALUES(eid,name,type);
+    ->
+    -> END /
+Query OK, 0 rows affected (0.01 sec)
+
+call chckprimaryt(1,"a","b")/
++-----------------------------------------+
+| Message                                 |
++-----------------------------------------+
+| 1record already present,Cant duplicate! |
++-----------------------------------------+
+1 row in set (0.00 sec)
+
+Query OK, 0 rows affected (0.00 sec)
+
+drop table temp5/
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> call chckprimaryt(1,'a','b')/
++-------------------------------------+
+| Sorry Entered table is not present. |
++-------------------------------------+
+| Sorry Entered table is not present. |
++-------------------------------------+
+1 row in set (0.00 sec)
+
+Query OK, 0 rows affected (0.01 sec)
+
+c)using continue in exception handler-
+Delimiter /
+create procedure enteremp3(IN eid int ,IN name varchar(25), IN last varchar(25), IN type varchar(25),IN sal int)
+BEGIN
+
+	DECLARE CONTINUE HANDLER FOR 1048
+      	BEGIN 
+    			SELECT 'Sorry.......emptype can not be null'Message; 
+      	select emptype from temp5;
+      	END;
+	INSERT INTO temp5(empid,fname,lname,emptype,empsal) values(eid, name, last, type,sal);
+
+END /
+
+call enteremp3(14,"2","3",NULL,5)/
++-------------------------------------+
+| Message                             |
++-------------------------------------+
+| Sorry.......emptype can not be null |
++-------------------------------------+
+1 row in set (0.00 sec)
+
++----------------+
+| emptype        |
++----------------+
+| HEAD CHEF      |
+| ACCOUNT        |
+| SENIOR MANAGER |
+| ACCOUNT        |
+| Housekeeping   |
+| KITCHEN        |
+| KITCHEN        |
+| MANAGER        |
+| MANAGER        |
+| Housekeeping   |
+| 4              |
+| 4              |
++----------------+
+12 rows in set (0.01 sec)
+
+Query OK, 0 rows affected (0.04 sec)
+
+
+
+
+
+
+
+
+
+
+

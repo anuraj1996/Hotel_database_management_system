@@ -1,0 +1,541 @@
+1)STORED PROCEDURES/PROCEDURES-
+
+
+
+KEY QUERY= select * from item where status='A' AND itemtype='F';
+
+PROCEDURE-
+DELIMITER /
+CREATE PROCEDURE proc1(IN itmid INT,out itmnm varchar(100),out itmcst float(10,2))
+BEGIN
+select itemname INTO itmnm from item where status='A' AND itemtype='F' AND itemid=itmid;
+select itemcost INTO itmcst from item where status='A' AND itemtype='F' AND itemid=itmid;
+END /
+
+set @itmnm ='';
+Query OK, 0 rows affected (0.00 sec)
+
+ set @itmcst =0.0;
+Query OK, 0 rows affected (0.00 sec)
+
+call proc1(3,@itmnm,@itmcst);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> select @itmnm,@itmcst;
++---------------+---------+
+| @itmnm        | @itmcst |
++---------------+---------+
+| KADAHI PANEER |     440 |
++---------------+---------+
+1 row in set (0.00 sec)
+
+-----------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+2) USER DEFINED FUNCTION INSIDE PROCEDURE-
+
+REFERENCED FUNCTION-
+
+
+key query-select coln_name,funcname() from table_name;
+
+converting key query into function-
+
+DELIMITER /
+    CREATE FUNCTION getitemstatus(itmid INT) RETURNS varchar(10)
+    BEGIN
+    RETURN(SELECT status FROM item where itemid=itmid);
+END /
+
+calling will be of this type-
+select itemid,getitemcost(itemid) from item;
+select itemid,getitemcost(itemid) from item;
+
+
+
+NOW ADDING FUNCTION INSIDE ABOVE PROCEDURE-
+
+
+a) DELIMITER /
+   CREATE PROCEDURE proc1(IN itmid INT,out sts varchar(10))
+   BEGIN
+   
+   SELECT getitemstatus(itmid) into sts from item where itemid=itmid;
+  
+   END /
+
+select @sts;
+    -> /
++------+
+| @sts |
++------+
+| A    |
++------+
+1 row in set (0.00 sec)
+
+
+b) 
+
+DELIMITER /
+CREATE PROCEDURE proc2(IN itmid INT,out sts varchar(10),out itmnm varchar(100),out itmcst float(10,2))
+BEGIN
+
+SELECT getitemstatus(itmid) into sts from item where itemid=itmid;
+select itemname INTO itmnm from item where status='A' AND itemtype='F' AND itemid=itmid;
+select itemcost INTO itmcst from item where status='A' AND itemtype='F' AND itemid=itmid;
+
+
+END /
+
+
+call proc2(3,@sts,@itmnm,@itmcst)/   (## how to check for multiple item id instead of only item id =3)
+
+select @sts,@itmnm,@itmcst/
++------+---------------+---------+
+| @sts | @itmnm        | @itmcst |
++------+---------------+---------+
+| A    | KADAHI PANEER |     440 |
++------+---------------+---------+
+1 row in set (0.00 sec)
+
+
+-----------------------------------------------------------------------------------------------------------
+
+
+
+3) LOOPING STRUCTUE IN MYSQL
+
+
+A) WHILE DO
+
+
+i)CREATE PROCEDURE PROC1()
+    -> BEGIN
+    -> declare repeater int;
+    -> declare count int;
+    -> set repeater=0;
+    -> set count=0;
+    -> select count(*) from employee INTO count;
+    -> while(repeater<=count)do
+    -> select fname,empsal from employee where empid=repeater;
+    ->       set repeater=repeater+1;
+    -> END WHILE;
+    -> END /
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> call proc1/
+Empty set (0.00 sec)
+
++-------+--------+
+| fname | empsal |
++-------+--------+
+| ANAND |  60000 |
++-------+--------+
+1 row in set (0.00 sec)
+
++-------+--------+
+| fname | empsal |
++-------+--------+
+| Amit  |  50000 |
++-------+--------+
+1 row in set (0.01 sec)
+
++--------+--------+
+| fname  | empsal |
++--------+--------+
+| Anurag | 150000 |
++--------+--------+
+1 row in set (0.01 sec)
+
++--------+--------+
+| fname  | empsal |
++--------+--------+
+| ramesh |  50000 |
++--------+--------+
+1 row in set (0.02 sec)
+
++--------+--------+
+| fname  | empsal |
++--------+--------+
+| suresh |  10000 |
++--------+--------+
+1 row in set (0.03 sec)
+
++-------+--------+
+| fname | empsal |
++-------+--------+
+| neha  |  40000 |
++-------+--------+
+1 row in set (0.03 sec)
+
++-------+--------+
+| fname | empsal |
++-------+--------+
+| ria   |  40000 |
++-------+--------+
+1 row in set (0.04 sec)
+
++---------+--------+
+| fname   | empsal |
++---------+--------+
+| zoravar | 100000 |
++---------+--------+
+1 row in set (0.04 sec)
+
++--------+--------+
+| fname  | empsal |
++--------+--------+
+| manish | 100000 |
++--------+--------+
+1 row in set (0.05 sec)
+
++-------+--------+
+| fname | empsal |
++-------+--------+
+| pappu |  10000 |
++-------+--------+
+1 row in set (0.06 sec)
+
+Query OK, 0 rows affected (0.07 sec)
+
+ii)CREATE PROCEDURE PROC1()
+    -> BEGIN
+    -> declare repeater int;
+    -> declare count int;
+    -> declare name varchar(25);
+    -> declare sal int;
+    ->
+    -> set repeater=0;
+    -> set count=0;
+    -> select count(*) from employee INTO count;
+    -> set name='';
+    -> set sal=0;
+    -> myloop:while(repeater<=count)do
+    ->
+    -> select fname INTO name from employee where empid=repeater;
+    ->       select empsal INTO sal from employee where empid=repeater;
+    ->       IF(name='pappu')
+    ->
+    ->      THEN select name,sal;
+    ->             LEAVE myloop;
+    ->
+    ->       ELSE
+    ->       set repeater=repeater+1;
+    ->       END IF;
+    ->
+    -> END WHILE myloop;
+    -> END /
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> call proc1/
++-------+-------+
+| name  | sal   |
++-------+-------+
+| pappu | 10000 |
++-------+-------+
+1 row in set (0.01 sec)
+
+Query OK, 0 rows affected (0.01 sec)
+
+b)REPEAT
+
+DELIMITER /
+CREATE PROCEDURE salhike()
+BEGIN
+declare repeater int;
+declare count int;
+set repeater=0;
+set count=0;
+select count(*) from employee INTO count;
+REPEAT
+	UPDATE employee set empsal=empsal+1000 where empid=repeater;
+	set repeater=repeater+1;
+UNTIL repeater=count+1
+END REPEAT;
+END /
+
+call salhike/
+Query OK, 1 row affected (0.03 sec)
+
+mysql> select * from employee;
+    -> /
++-------+---------+----------+----------------+--------+
+| empid | fname   | lname    | emptype        | empsal |
++-------+---------+----------+----------------+--------+
+|     1 | ANAND   | SINGH    | HEAD CHEF      |  63000 |
+|     2 | Amit    | KAPOOR   | ACCOUNT        |  53000 |
+|     3 | Anurag  | BANSAL   | SENIOR MANAGER | 153000 |
+|     4 | ramesh  | GUPTA    | ACCOUNT        |  53000 |
+|     5 | suresh  | SHARMA   | Housekeeping   |  13000 |
+|     6 | neha    | VERMA    | KITCHEN        |  43000 |
+|     7 | ria     | SINGH    | KITCHEN        |  43000 |
+|     8 | zoravar | KUMAR    | MANAGER        | 103000 |
+|     9 | manish  | KUMAR    | MANAGER        | 102000 |
+|    10 | pappu   | kapghate | Housekeeping   |  11000 |
++-------+---------+----------+----------------+--------+
+10 rows in set (0.00 sec)
+
+c)LOOP-
+
+DELIMITER /
+CREATE PROCEDURE checkstatus()
+BEGIN
+declare repeater int;
+declare count int;
+set repeater=0;
+set count=0;
+select count(*) from customer INTO count;
+confirmstatus:LOOP
+	IF repeater>count
+ 		THEN leave confirmstatus;
+	END IF;
+	select * from customer where status="confirm" AND customerid=repeater; 
+	set repeater=repeater+1;
+END LOOP;
+END /
+
+call checkstatus/
+Empty set (0.00 sec)
+
++------------+-------+----------+-----------+------------+--------+---------+---------+
+| customerid | fname | lname    | address   | contact    | gender | idproof | status  |
++------------+-------+----------+-----------+------------+--------+---------+---------+
+|          1 | AJIT  | SINGHINA | ABC CHOWK | 646472293O | M      | DL      | CONFIRM |
++------------+-------+----------+-----------+------------+--------+---------+---------+
+1 row in set (0.00 sec)
+
++------------+-------+-------+-----------+------------+--------+---------+---------+
+| customerid | fname | lname | address   | contact    | gender | idproof | status  |
++------------+-------+-------+-----------+------------+--------+---------+---------+
+|          2 | ANIL  | KAPUR | XYZ VIHAR | 5467784466 | M      | PAN     | CONFIRM |
++------------+-------+-------+-----------+------------+--------+---------+---------+
+1 row in set (0.01 sec)
+
++------------+--------+--------+-----------+------------+--------+---------+---------+
+| customerid | fname  | lname  | address   | contact    | gender | idproof | status  |
++------------+--------+--------+-----------+------------+--------+---------+---------+
+|          3 | GARIMA | BANSAL | ABC NAGAR | 3466779899 | F      | ADHAAR  | CONFIRM |
++------------+--------+--------+-----------+------------+--------+---------+---------+
+1 row in set (0.02 sec)
+
+Empty set (0.02 sec)
+
++------------+-------+--------+-----------+------------+--------+---------+---------+
+| customerid | fname | lname  | address   | contact    | gender | idproof | status  |
++------------+-------+--------+-----------+------------+--------+---------+---------+
+|          5 | ALKA  | TIWARI | SER VILLA | 3565896533 | F      | PAN     | CONFIRM |
++------------+-------+--------+-----------+------------+--------+---------+---------+
+1 row in set (0.02 sec)
+
++------------+--------+-------+-----------+------------+--------+---------+---------+
+| customerid | fname  | lname | address   | contact    | gender | idproof | status  |
++------------+--------+-------+-----------+------------+--------+---------+---------+
+|          6 | HITESH | VERMA | DET NAGAR | 3567896563 | M      | DL      | CONFIRM |
++------------+--------+-------+-----------+------------+--------+---------+---------+
+1 row in set (0.04 sec)
+
+Empty set (0.05 sec)
+
++------------+--------+--------+-----------+------------+--------+---------+---------+
+| customerid | fname  | lname  | address   | contact    | gender | idproof | status  |
++------------+--------+--------+-----------+------------+--------+---------+---------+
+|          8 | CHINKI | RAJPUT | DET NAGAR | 46472293O7 | F      | DL      | CONFIRM |
++------------+--------+--------+-----------+------------+--------+---------+---------+
+1 row in set (0.05 sec)
+
+Empty set (0.06 sec)
+
++------------+-------+--------+------------+------------+--------+---------+---------+
+| customerid | fname | lname  | address    | contact    | gender | idproof | status  |
++------------+-------+--------+------------+------------+--------+---------+---------+
+|         10 | NITIN | MISHRA | SDR COLONY | 46472293O1 | M      | ADHAAR  | CONFIRM |
++------------+-------+--------+------------+------------+--------+---------+---------+
+1 row in set (0.06 sec)
+
+Query OK, 0 rows affected (0.07 sec)
+
+d)cursor-
+
+DELIMITER /
+create procedure chckcursor()
+Begin
+DECLARE flg INT;
+DECLARE pamt float(10,2);
+Declare pamount float(10,2);
+Declare total_amount Cursor FOR select amount from payment where amount is not null ;
+Declare continue handler for not found set flg=1;
+
+SET flg=0;
+SET pamt=0.0;
+SET pamount= 0.0;
+
+Open total_amount;
+     
+     get_totalamt : LOOP
+     FETCH total_amount INTO pamt;
+     
+     IF
+       flg=1 THEN LEAVE get_totalamt;
+     END IF;
+     
+    
+     
+     SET pamount=pamount+pamt;
+   
+    
+END LOOP get_totalamt;
+CLOSE total_amount;
+SELECT pamount;
+
+END /
+
+call chckcursor/
++-----------+
+| pamount   |
++-----------+
+| 106040.00 |
++-----------+
+1 row in set (0.00 sec)
+
+Query OK, 0 rows affected (0.00 sec)
+
+---------------------------------------------------------------------------------------------------------------------------
+
+4) TRIGGERS-
+ 
+a i)
+
+REFERENCE- use temp;
+mysql> select * from aa;
++------+
+| aid  |
++------+
+|    1 |
+|    2 |
+|    3 |
+|    4 |
+|    5 |
++------+
+5 rows in set (0.00 sec)
+
+NOW key query- want to set condition 
+that the aid in the aa table should only input values b/w 0 & 10-
+
+creating an insert trigger for the same-
+
+DELIMITER /
+CREATE TRIGGER trig1 BEFORE INSERT ON aa FOR EACH ROW 
+BEGIN
+	IF new.aid<0 
+		THEN SET new.aid=0;
+	ELSEIF new.aid>10 
+		THEN SET new.aid=10;
+	END IF;
+END /
+
+ 
+
+mysql> insert into aa values(-1);
+    -> /
+Query OK, 1 row affected (0.01 sec)
+
+mysql> select * from aa;
+    -> /
+select * from aa;
+    -> /
++------+
+| aid  |
++------+
+|    1 |
+|    2 |
+|    3 |
+|    4 |
+|    5 |
+|    0 |
++------+
+6 rows in set (0.00 sec)
+
+
+ii) running same key query for update-
+
+DELIMITER /
+CREATE TRIGGER trig2 BEFORE UPDATE ON aa FOR EACH ROW 
+BEGIN
+	IF new.aid<0 
+		THEN SET new.aid=0;
+	ELSEIF new.aid>10 
+		THEN SET new.aid=10;
+	END IF;
+END /
+ 
+
+update aa set aid=100;
+    -> /
+Query OK, 5 rows affected (0.00 sec)
+Rows matched: 5  Changed: 5  Warnings: 0
+
+mysql> select * from aa/
++------+
+| aid  |
++------+
+|   10 |
+|   10 |
+|   10 |
+|   10 |
+|   10 |
++------+
+5 rows in set (0.00 sec)
+
+b) calling a procedure inside the trigger-
+
+Procedure-
+
+DELIMITER /
+CREATE PROCEDURE checkyr(IN yr int(10))
+BEGIN
+ IF yr>2023 THEN SIGNAL SQLSTATE '45000'
+ 	SET MESSAGE_TEXT="cant select future booking greater than 1 year";
+ ELSEIF yr<2022 THEN SIGNAL SQLSTATE '45001'
+ 	SET MESSAGE_TEXT="cant select past year.Enter correct details!";
+END IF;
+END /
+
+trigger-
+
+create trigger checkbookyr BEFORE INSERT ON booking for each row
+BEGIN
+	call checkyr(year(NEW.bookingdate));
+END /
+
+insert into booking (bookingdate) values ('2024-05-01')/
+ERROR 1644 (45000): cant select future booking greater than 1 year
+mysql> insert into booking (bookingdate) values ('2020-05-01')/
+ERROR 1644 (45001): cant select past year.Enter correct details!
+mysql>
+
+
+
+	
+
+
+
+
+
+
+
+
+ 
+    
+
+
+
+
+
+
+
+
+

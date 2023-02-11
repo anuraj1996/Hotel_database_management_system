@@ -1,0 +1,232 @@
+ use hotel2;
+
+CREATE TABLE customer(
+     customerid          int(10),
+     fname                varchar(50)NOT NULL,
+     lname                varchar(50)NOT NULL,
+     address          text NOT NULL,
+     contact          varchar(15) NOT NULL,
+     gender          varchar(10) NOT NULL,
+     idproof          varchar(100) NOT NULL,
+     status          varchar(10) NOT NULL,
+     primary key(customerid)
+     );
+
+CREATE TABLE roomtype(
+     roomtypeid        int(20),
+     roomtype        varchar(100) NOT NULL,
+     nop              INT(20) NOT NULL,
+     cost              float(10,2) NOT NULL,
+     status        varchar(10) NOT NULL,
+     primary key(roomtypeid)
+     );
+
+CREATE TABLE room(
+     roomid       int(10),
+     roomtypeid       int(10),
+     roomno       varchar(10) NOT NULL,
+     status       varchar(10) NOT NULL,
+    
+     primary key(roomid),
+     foreign key(roomtypeid) references roomtype(roomtypeid)
+     );
+
+ CREATE TABLE item(
+     itemid     int(10),
+     itemtype     varchar(25) NOT NULL,
+     itemname     varchar(100) NOT NULL,
+     itemcost     float(10,2) NOT NULL,
+     status     varchar(10) NOT NULL,
+    
+     primary key(itemid)
+     );
+
+ CREATE TABLE orders
+     (
+     orderid    int(10),
+     itemid    int(10),
+     bookingid    int(10),
+     orderdate    Datetime NOT NULL,
+     qty          int(10) NOT NULL,
+     status    varchar(10) NOT NULL,
+    
+     primary key(orderid),
+     foreign key(itemid) references item(itemid),
+     foreign key(bookingid) references booking(bookingid)
+     );
+CREATE TABLE payment(
+     payid                     int(10),
+     bookingid               int(10),
+     itemid                     int(10),
+     itemcost                   float(10,2) DEFAULT null,
+     orderid               int(10),
+     qty                        INT (10) DEFAULT 0,
+     roomtypeid                 int(20),
+     cost                       float(10,2) DEFAULT null,
+     checkinp                   datetime DEFAULT null,
+     checkoutp                  datetime DEFAULT null,
+     duration                   INT(10) DEFAULT null,
+     amount               float(10,2) DEFAULT NUll,
+     paytype               varchar(20) NOT NULL,
+     paydate               Datetime DEFAULT NULL,
+    
+    
+     primary key(payid),
+     foreign key(bookingid) references booking(bookingid),
+     foreign key(orderid) references orders(orderid),
+     foreign key(roomtypeid) references roomtype(roomtypeid)
+    
+     );
+
+
+
+
+-------------------------------------------------------------------------
+
+INSERT INTO roomtype
+       ( roomtypeid,roomtype, nop,cost,status )
+     VALUES
+           ( 1,'Standard', 2,5000,'vacant'),
+     ( 2,'Deluxe', 3,7000,'active'),
+     ( 3,'Super Deluxe', 4,8500,'vacant'),
+     ( 4,'Maharaja Suite', 5,12000,'vacant');
+
+update roomtype set status ='vacant' where roomtypeid=2;
+
+
+INSERT INTO room
+       ( roomid,roomtypeid,roomno,status)
+     VALUES
+     ( 1,1,'101','vacant'),
+     ( 2,2,'102','occupied'),
+     ( 3,4,'103','vacant'),
+     ( 4,2,'104','occupied'),
+     ( 5,1,'105','vacant'),
+     ( 6,3,'106','occupied'),
+     ( 7,3,'107','vacant'),
+     ( 8,2,'108','occupied'),
+           ( 9,4,'109','occupied'),
+           ( 10,1,'110','vacant');
+
+alter table employee drop column status;
+
+
+INSERT INTO EMPLOYEE
+     ( EMPID,fNAME,lname,EMPTYPE,empsal) VALUES
+    
+     (1,'ANAND','SINGH','HEAD CHEF',60000),
+     (2,'Amit','KAPOOR','ACCOUNT',50000),
+     (3,'Anurag','BANSAL','SENIOR MANAGER',150000),
+     (4,'ramesh','GUPTA','ACCOUNT',50000),
+     (5,'suresh','SHARMA','Housekeeping',10000),
+     (6,'neha','VERMA','KITCHEN',40000),
+     (7,'ria','SINGH','KITCHEN',40000),
+     (8,'zoravar','KUMAR','MANAGER',100000),
+     (9,'manish','KUMAR','MANAGER',100000),
+     (10,'pappu','kapghate','Housekeeping',10000);
+
+
+ALTER TABLE EMPLOYEE CHANGE COLUMN FENAME FNAME VARCHAR(25);
+
+
+ALTER TABLE EMPLOYEE CHANGE COLUMN LENAME LNAME VARCHAR(25);
+
+
+ALTER TABLE EMPLOYEE CHANGE COLUMN LNAME lname VARCHAR(25);
+
+ALTER TABLE EMPLOYEE CHANGE COLUMN FNAME fname VARCHAR(25);
+
+INSERT INTO EMPLOYEE
+     ( EMPID,fNAME,lname,EMPTYPE,empsal) VALUES
+    
+     (1,'ANAND','SINGH','HEAD CHEF',60000),
+     (2,'Amit','KAPOOR','ACCOUNT',50000),
+     (3,'Anurag','BANSAL','SENIOR MANAGER',150000),
+     (4,'ramesh','GUPTA','ACCOUNT',50000),
+     (5,'suresh','SHARMA','Housekeeping',10000),
+     (6,'neha','VERMA','KITCHEN',40000),
+     (7,'ria','SINGH','KITCHEN',40000),
+     (8,'zoravar','KUMAR','MANAGER',100000),
+     (9,'manish','KUMAR','MANAGER',100000),
+     (10,'pappu','kapghate','Housekeeping',10000);
+
+INSERT INTO item
+       ( itemid,itemtype,itemname,itemcost,status)
+     VALUES
+     ( 1,'F','DAAL MAKHANI',450,'NA'),
+     ( 2,'B','MOJITO',160,'A'),
+     ( 3,'F','KADAHI PANEER',440,'A'),
+     ( 4,'F','CHICKEN 65',700,'A'),
+     ( 5,'B','FRESH LIMESODA',120,'A'),
+     ( 6,'F','PIZZA',900,'A'),
+     ( 7,'B','REDBULL',120,'NA'),
+     ( 8,'F','BURGER',200,'A'),
+          ( 9,'B','ORANGE JUICE',150,'A'),
+          ( 10,'F','ICECREAM',180,'A');
+
+
+ALTER TABLE CUSTOMER DROP COLUMN GENDER;
+
+ALTER TABLE CUSTOMER ADD COLUMN GENDER ENUM('M','F') AFTER CONTACT;
+
+ALTER TABLE CUSTOMER CHANGE COLUMN GENDER gender enum('m','f');
+
+
+INSERT INTO CUSTOMER
+     ( customerid,fNAME,lname,address,contact,gender,idproof,status) VALUES
+    
+     ( 1,'AJIT','SINGHINA','ABC CHOWK','646472293O','M','DL','CONFIRM'),
+     ( 2,'ANIL','KAPUR','XYZ VIHAR','5467784466','M','PAN','CONFIRM'),
+     ( 3,'GARIMA','BANSAL','ABC NAGAR','3466779899','F','ADHAAR','CONFIRM'),
+     ( 4,'TRISHA','GUPTA','PQR ZILA','3567896533','F','DL','WAITLIST'),
+     ( 5,'ALKA','TIWARI','SER VILLA','3565896533','F','PAN','CONFIRM'),
+     ( 6,'HITESH','VERMA','DET NAGAR','3567896563','M','DL','CONFIRM'),
+     ( 7,'JIGNESH','SINGH','ABC CHOWK','3567876533','M','PAN','WAITLIST'),
+     ( 8,'CHINKI','RAJPUT','DET NAGAR','46472293O7','F','DL','CONFIRM'),
+     ( 9,'NITIN','KUMAR','HTY VIHAR','46472293O6','M','ADHAAR','CANCEL'),
+     ( 10,'NITIN','MISHRA','SDR COLONY','46472293O1','M','ADHAAR','CONFIRM');
+
+ALTER TABLE CUSTOMER CHANGE COLUMN gender gender enum('M','F');
+
+ALTER TABLE BOOKING modify COLUMN checkin datetime default null;
+
+ALTER TABLE BOOKING modify COLUMN checkout datetime default null;
+
+UPDATE ROOM SET STATUS = 'vacant' where roomid IN(2,4,6,8,9);
+
+
+INSERT INTO booking
+       ( BOOKINGid,ROOMID,CUSTOMERID,BOOKINGDATE,CHECKIN,CHECKOUT,STATUS)
+     VALUES
+     ( 1,1,1,'2016-01-01','2016-01-02 12:00:00','2016-01-04 12:00:00','CONFIRM'),
+     ( 2,2,6,'2016-02-02','2016-02-03 14:00:00','2016-02-05 12:00:00','CONFIRM'),
+     ( 3,3,8,'2017-03-03','2017-03-04 16:00:00','2017-03-06 12:00:00','CONFIRM'),
+     ( 4,4,7,'2018-04-04','2018-04-05 14:00:00','2018-04-07 12:00:00','WAITLIST'),
+     ( 5,5,10,'2018-05-05','2018-05-09 12:00:00','2018-05-011 12:00:00','CONFIRM'),
+     ( 6,6,2,'2019-03-02','2019-03-06 16:00:00','2019-03-08 12:00:00','CONFIRM'),
+     ( 7,7,4,'2017-02-03','2017-02-07 12:00:00','2017-02-09 12:00:00','WAITLIST'),
+     ( 8,8,3,'2022-03-05','2022-03-08 14:00:00','2022-03-09 12:00:00','CONFIRM'),
+          ( 9,9,9,'2021-04-01','2021-04-08 12:00:00','2021-04-10 12:00:00','CANCEL'),
+          ( 10,10,5,'2022-04-06','2022-04-10 12:00:00','2022-04-14 12:00:00','CONFIRM');
+
+ALTER TABLE ORDERS modify COLUMN qty int(10) default null;
+
+
+ INSERT INTO ORDERS
+       ( ORDERID,ITEMID,BOOKINGID,ORDERDATE,QTY,status)
+     VALUES
+     ( 1,1,1,'2016-01-02 14:30:20',NULL,'DENIED'),
+     ( 2,2,2,'2016-02-03 16:30:30',2,'ACCEPT'),
+     ( 3,3,3,'2017-03-04 18:30:40',2,'ACCEPT'),
+     ( 4,4,4,'2018-04-05 20:00:50',1,'ACCEPT'),
+     ( 5,5,5,'2018-05-09 23:30:10',4,'DENIED'),
+     ( 6,6,6,'2019-03-06 22:50:20',2,'ACCEPT'),
+     ( 7,7,7,'2017-02-07 20:00:00',NULL,'DENIED'),
+     ( 8,8,8,'2022-03-08 21:00:40',1,'ACCEPT'),
+         ( 9,9,9,'2021-04-08 15:00:00',2,'DENIED'),
+         ( 10,10,10,'2022-04-10 16:20:00',2,'ACCEPT');
+
+
+
+
+

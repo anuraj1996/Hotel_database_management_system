@@ -1,0 +1,176 @@
+sub query on hotel management
+
+mysql> select * from employee;
++-------+---------+----------+----------------+--------+
+| empid | fname   | lname    | emptype        | empsal |
++-------+---------+----------+----------------+--------+
+|     1 | ANAND   | SINGH    | HEAD CHEF      |  60000 |
+|     2 | Amit    | KAPOOR   | ACCOUNT        |  50000 |
+|     3 | Anurag  | BANSAL   | SENIOR MANAGER | 150000 |
+|     4 | ramesh  | GUPTA    | ACCOUNT        |  50000 |
+|     5 | suresh  | SHARMA   | Housekeeping   |  10000 |
+|     6 | neha    | VERMA    | KITCHEN        |  40000 |
+|     7 | ria     | SINGH    | KITCHEN        |  40000 |
+|     8 | zoravar | KUMAR    | MANAGER        | 100000 |
+|     9 | manish  | KUMAR    | MANAGER        | 100000 |
+|    10 | pappu   | kapghate | Housekeeping   |  10000 |
++-------+---------+----------+----------------+--------+
+
+mysql> select fname , lname from employee where empsal = (select max(empsal) from employee);
++--------+--------+
+| fname  | lname  |
++--------+--------+
+| Anurag | BANSAL |
++--------+--------+
+
+mysql> select fname , lname from employee where empsal > (select avg(empsal) from employee);
++---------+--------+
+| fname   | lname  |
++---------+--------+
+| Anurag  | BANSAL |
+| zoravar | KUMAR  |
+| manish  | KUMAR  |
++---------+--------+
+
+
+mysql> select avg(empsal) from employee;
++-------------+
+| avg(empsal) |
++-------------+
+|  61000.0000 |
++-------------+
+
+When subquery is returning more than one values
+
+mysql> select * from item;
++--------+----------+----------------+----------+--------+
+| itemid | itemtype | itemname       | itemcost | status |
++--------+----------+----------------+----------+--------+
+|      1 | F        | DAAL MAKHANI   |   450.00 | NA     |
+|      2 | B        | MOJITO         |   160.00 | A      |
+|      3 | F        | KADAHI PANEER  |   440.00 | A      |
+|      4 | F        | CHICKEN 65     |   700.00 | A      |
+|      5 | B        | FRESH LIMESODA |   120.00 | A      |
+|      6 | F        | PIZZA          |   900.00 | A      |
+|      7 | B        | REDBULL        |   120.00 | NA     |
+|      8 | F        | BURGER         |   200.00 | A      |
+|      9 | B        | ORANGE JUICE   |   150.00 | A      |
+|     10 | F        | ICECREAM       |   180.00 | A      |
++--------+----------+----------------+----------+--------+
+
+mysql> select * from orders;
++---------+--------+-----------+---------------------+------+--------+
+| orderid | itemid | bookingid | orderdate           | qty  | status |
++---------+--------+-----------+---------------------+------+--------+
+|       1 |      1 |         1 | 2016-01-02 14:30:20 |    0 | DENIED |
+|       2 |      2 |         2 | 2016-02-03 16:30:30 |    2 | ACCEPT |
+|       3 |      3 |         3 | 2017-03-04 18:30:40 |    2 | ACCEPT |
+|       4 |      4 |         4 | 2018-04-05 20:00:50 |    1 | ACCEPT |
+|       5 |      5 |         5 | 2018-05-09 23:30:10 |    4 | DENIED |
+|       6 |      6 |         6 | 2019-03-06 22:50:20 |    2 | ACCEPT |
+|       7 |      7 |         7 | 2017-02-07 20:00:00 |    0 | DENIED |
+|       8 |      8 |         8 | 2022-03-08 21:00:40 |    1 | ACCEPT |
+|       9 |      9 |         9 | 2021-04-08 15:00:00 |    2 | DENIED |
+|      10 |     10 |        10 | 2022-04-10 16:20:00 |    2 | ACCEPT |
++---------+--------+-----------+---------------------+------+--------+
+
+
+mysql> select itemname from item where itemid in (select itemid from orders where qty = (select max(qty) from orders));
++----------------+
+| itemname       |
++----------------+
+| FRESH LIMESODA |
++----------------+
+
+mysql> select itemname from item where itemid in (select itemid from orders where status = 'denied');
++----------------+
+| itemname       |
++----------------+
+| DAAL MAKHANI   |
+| FRESH LIMESODA |
+| REDBULL        |
+| ORANGE JUICE   |
++----------------+
+
+EXIST AND NOT EXIST
+mysql> select * from employee where EXISTS (select empsal from employee where empsal > 50000);
++-------+---------+----------+----------------+--------+
+| empid | fname   | lname    | emptype        | empsal |
++-------+---------+----------+----------------+--------+
+|     1 | ANAND   | SINGH    | HEAD CHEF      |  60000 |
+|     2 | Amit    | KAPOOR   | ACCOUNT        |  50000 |
+|     3 | Anurag  | BANSAL   | SENIOR MANAGER | 150000 |
+|     4 | ramesh  | GUPTA    | ACCOUNT        |  50000 |
+|     5 | suresh  | SHARMA   | Housekeeping   |  10000 |
+|     6 | neha    | VERMA    | KITCHEN        |  40000 |
+|     7 | ria     | SINGH    | KITCHEN        |  40000 |
+|     8 | zoravar | KUMAR    | MANAGER        | 100000 |
+|     9 | manish  | KUMAR    | MANAGER        | 100000 |
+|    10 | pappu   | kapghate | Housekeeping   |  10000 |
++-------+---------+----------+----------------+--------+
+
+mysql> select * from payment;
++-------+-----------+--------+----------+---------+------+------------+----------+---------------------+---------------------+----------+----------+-------------+---------------------+
+| payid | bookingid | itemid | itemcost | orderid | qty  | roomtypeid | cost     | checkinp            | checkoutp           | duration | amount   | paytype     | paydate             |
++-------+-----------+--------+----------+---------+------+------------+----------+---------------------+---------------------+----------+----------+-------------+---------------------+
+|     1 |         1 |      1 |   450.00 |       1 |    0 |          1 |  5000.00 | 2016-01-02 12:00:00 | 2016-01-04 12:00:00 |        2 | 10000.00 | CASH        | 2016-01-04 12:00:00 |
+|     2 |         2 |      2 |   160.00 |       2 |    2 |          2 |  7000.00 | 2016-02-03 14:00:00 | 2016-02-05 12:00:00 |        2 | 14320.00 | NET BANKING | 2016-02-05 12:00:00 |
+|     3 |         3 |      3 |   440.00 |       3 |    2 |          4 | 12000.00 | 2017-03-04 16:00:00 | 2017-03-06 12:00:00 |        2 | 24880.00 | CASH        | 2017-03-06 12:00:00 |
+|     4 |         4 |      4 |   700.00 |       4 |    1 |          2 |  7000.00 | 2018-04-05 14:00:00 | 2018-04-07 12:00:00 |        2 | 14700.00 | UPI         | 2018-04-07 12:00:00 |
+|     5 |         5 |      5 |   120.00 |       5 |    4 |          1 |  5000.00 | 2018-05-09 12:00:00 | 2018-05-11 12:00:00 |        2 | 10480.00 | UPI         | 2018-05-11 12:00:00 |
+|     6 |         6 |      6 |   900.00 |       6 |    2 |          3 |  8500.00 | 2019-03-06 16:00:00 | 2019-03-08 12:00:00 |        2 | 18800.00 | NET BANKING | 2019-03-08 12:00:00 |
+|     7 |         7 |      7 |   120.00 |       7 |    0 |          3 |  8500.00 | 2017-02-07 12:00:00 | 2017-02-09 12:00:00 |        2 | 17000.00 | UPI         | 2017-02-09 12:00:00 |
+|     8 |         8 |      8 |   200.00 |       8 |    1 |          2 |  7000.00 | 2022-03-08 14:00:00 | 2022-03-09 12:00:00 |        1 |  7200.00 | CASH        | 2022-03-09 12:00:00 |
+|     9 |         9 |      9 |   150.00 |       9 |    2 |          4 | 12000.00 | 2021-04-08 12:00:00 | 2021-04-10 12:00:00 |        2 | 24300.00 | NET BANKING | 2021-04-10 12:00:00 |
+|    10 |        10 |     10 |   180.00 |      10 |    2 |          1 |  5000.00 | 2022-04-10 12:00:00 | 2022-04-14 12:00:00 |        4 | 20360.00 | DEBIT CARD  | 2022-04-14 12:00:00 |
++-------+-----------+--------+----------+---------+------+------------+----------+---------------------+---------------------+----------+----------+-------------+---------------------+
+10 rows in set (0.00 sec)
+
+mysql> select * from item;
++--------+----------+----------------+----------+--------+
+| itemid | itemtype | itemname       | itemcost | status |
++--------+----------+----------------+----------+--------+
+|      1 | F        | DAAL MAKHANI   |   450.00 | NA     |
+|      2 | B        | MOJITO         |   160.00 | A      |
+|      3 | F        | KADAHI PANEER  |   440.00 | A      |
+|      4 | F        | CHICKEN 65     |   700.00 | A      |
+|      5 | B        | FRESH LIMESODA |   120.00 | A      |
+|      6 | F        | PIZZA          |   900.00 | A      |
+|      7 | B        | REDBULL        |   120.00 | NA     |
+|      8 | F        | BURGER         |   200.00 | A      |
+|      9 | B        | ORANGE JUICE   |   150.00 | A      |
+|     10 | F        | ICECREAM       |   180.00 | A      |
++--------+----------+----------------+----------+--------+
+10 rows in set (0.00 sec)
+
+mysql> select itemcost from payment where exists(select itemcost from item where status = 'na');
++----------+
+| itemcost |
++----------+
+|   450.00 |
+|   160.00 |
+|   440.00 |
+|   700.00 |
+|   120.00 |
+|   900.00 |
+|   120.00 |
+|   200.00 |
+|   150.00 |
+|   180.00 |
++----------+
+10 rows in set (0.00 sec)
+
+mysql> select itemcost from payment where not exists(select itemcost from item where status = 'na');
+Empty set (0.00 sec)
+
+
+
+
+
+
+
+
+
+
+
+
